@@ -2,7 +2,11 @@ const { response } = require('express')
 const express = require('express') // importing the express framework and storing it in a variable
 
 const fs=require('fs')
+const { request } = require('http')
 const app = express()
+
+app.use(express.json())
+app.use(express.urlencoded({extended : true}))
 
 //get all todo items
 app.get('/todos',(request,response)=>{
@@ -67,6 +71,33 @@ app.get('/todos/:id/complete',(request,response)=>{
     })
 })
 
+//add a new todo item to the list
+app.post('/todo',(request,response) => {
+    if (!request.body.name) {
+        return response.status(400).send("Missing name")
+    }
+
+    fs.readFile('./store/todos.json', 'utf-8',(err,data)=>{
+        if (err) {
+            return response.status(500).send('file not found')
+        }
+
+        let todos = JSON.parse(data)
+        const maxId = Math.max.apply(Math, todos.map(todo => {return todo.id}))
+
+        todos.push({
+            id: maxId+1,
+            complete: false,
+            name: request.body.name
+        })
+
+        fs.writeFile('./store/todos.json',JSON.stringify(todos),()=>{
+            response.json({'status':'ok'})
+        })
+
+    })
+
+})
 
 
 app.listen(3000, ()=>{
