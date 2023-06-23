@@ -7,13 +7,25 @@ const app = express()
 //get all todo items
 app.get('/todos',(request,response)=>{
 
+    const showPending = request.query.showpending
+
+
     fs.readFile('./store/todos.json','utf-8',(err,data)=>{
 
         if (err) {
             return response.status(500).send('file not found')
         }
         const todos = JSON.parse(data)
-        return response.json({todos : todos})
+
+        //filter all pending todos if not query parameter is not True
+        if (showPending !== "True") {
+            return response.json({todos : todos})
+        }
+        else{
+            return response.json({
+                todos : todos.filter(todo => {return todo.complete === false})})
+        }
+        
 
     })
 })
