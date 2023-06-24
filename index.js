@@ -8,6 +8,11 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended : true}))
 
+//for healthcheck
+app.get('/', (request,response)=>{
+    return response.send('hello world')
+})
+
 //get all todo items
 app.get('/todos',(request,response)=>{
 
