@@ -1,17 +1,15 @@
-FROM node:18-alpine
+FROM node:18
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 ENV NODE_ENV production
 
-COPY package.json ./
+COPY package*.json ./
 
 RUN npm install
 
 COPY . .
 
-RUN npm install -g pm2
-
 EXPOSE 3000
 
-CMD [ "pm2-runtime" , "index.js" ]
+CMD [ "npm" , "start" ]
