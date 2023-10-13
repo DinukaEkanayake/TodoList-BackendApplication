@@ -1,0 +1,100 @@
+name: Continuous integration workflow
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: 'Run unit tests'
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: 'checkout repo'
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 'Install dependencies'
+        run: npm install
+
+      - name: 'Run tests'
+        run: npm run test
+
+  # Run the linter to check for code style issues
+  lint:
+    name: 'Run linter'
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: 'checkout repo'
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 'Install dependencies'
+        run: npm install
+
+      - name: 'Run linter'
+        run: npx standard -v
+
+#  sonarqube:
+#    name: 'Run sonarqube'
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#      - name: SonarQube Scan
+#        uses: sonarsource/sonarqube-scan-action@master
+#        env:
+#          SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+#          SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
+
+  build:
+    name: 'Build docker image'
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: 'checkout repo'
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 'Install dependencies'
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: dinukaekanayake/fashiongallery
+          tags: todolist-latest
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
